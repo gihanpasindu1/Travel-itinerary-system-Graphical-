@@ -314,6 +314,10 @@ body {
     <div class="modal-content">
       <h2>API Settings</h2>
       <div class="input-group">
+        <label for="backend-url">Backend API URL</label>
+        <input type="text" id="backend-url" placeholder="http://127.0.0.1:8000">
+      </div>
+      <div class="input-group">
         <label for="gemini-key">Gemini API Key</label>
         <input type="password" id="gemini-key" placeholder="Enter Gemini API Key...">
       </div>
@@ -373,10 +377,12 @@ body {
     const closeSettingsBtn = document.getElementById('close-settings');
     const saveSettingsBtn = document.getElementById('save-settings');
     
+    const backendUrlInput = document.getElementById('backend-url');
     const geminiInput = document.getElementById('gemini-key');
     const pexelsInput = document.getElementById('pexels-key');
 
     // Load keys from LocalStorage
+    backendUrlInput.value = localStorage.getItem('backend_url') || 'http://127.0.0.1:8000';
     geminiInput.value = localStorage.getItem('gemini_key') || '';
     pexelsInput.value = localStorage.getItem('pexels_key') || '';
 
@@ -387,11 +393,18 @@ body {
 
     closeSettingsBtn.addEventListener('click', () => {
       settingsModal.classList.remove('active');
+      backendUrlInput.value = localStorage.getItem('backend_url') || 'http://127.0.0.1:8000';
       geminiInput.value = localStorage.getItem('gemini_key') || '';
       pexelsInput.value = localStorage.getItem('pexels_key') || '';
     });
 
     saveSettingsBtn.addEventListener('click', () => {
+      let url = backendUrlInput.value.trim();
+      // Remove trailing slash if present
+      if (url.endsWith('/')) {
+        url = url.slice(0, -1);
+      }
+      localStorage.setItem('backend_url', url || 'http://127.0.0.1:8000');
       localStorage.setItem('gemini_key', geminiInput.value.trim());
       localStorage.setItem('pexels_key', pexelsInput.value.trim());
       settingsModal.classList.remove('active');
@@ -417,7 +430,8 @@ body {
       spinner.style.display = 'block';
 
       try {
-        const response = await fetch('http://127.0.0.1:8000/generate-from-raw', {
+        const baseUrl = localStorage.getItem('backend_url') || 'http://127.0.0.1:8000';
+        const response = await fetch(`${baseUrl}/generate-from-raw`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
