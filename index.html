@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Itinerary Studio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --color-primary: #0a1128; /* Deep Navy */
+  --color-secondary: #d4af37; /* Luxury Gold */
+  --color-secondary-hover: #b5952f;
+  --color-bg: #f4f6f9;
+  --color-text: #1a1a1a;
+  --color-surface: #ffffff;
+  --color-border: #e0e5ec;
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --radius-lg: 16px;
+  --radius-md: 8px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: var(--color-bg);
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(220, 60%, 98%, 1) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(43, 67%, 95%, 1) 0px, transparent 50%);
+  color: var(--color-text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.app-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+  animation: fadeInDown 0.8s ease-out;
+}
+
+.header h1 {
+  font-family: 'Playfair Display', serif; /* Elegant serif for the brand */
+  color: var(--color-primary);
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  color: #666;
+  font-size: 1.1rem;
+  font-weight: 300;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.studio-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem;
+  box-shadow: var(--shadow-lg);
+  animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+.input-group {
+  margin-bottom: 2rem;
+}
+
+.input-group label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.itinerary-input {
+  width: 100%;
+  min-height: 300px;
+  padding: 1.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  color: var(--color-text);
+  background: var(--color-surface);
+  transition: all 0.3s ease;
+  resize: vertical;
+}
+
+.itinerary-input:focus {
+  outline: none;
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+  box-shadow: 0 4px 14px 0 rgba(10, 17, 40, 0.39);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #162450;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(10, 17, 40, 0.23);
+}
+
+.btn-secondary {
+  background-color: var(--color-secondary);
+  color: #fff;
+  box-shadow: 0 4px 14px 0 rgba(212, 175, 55, 0.39);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--color-secondary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.23);
+}
+
+.btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Spinner Animation */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+.error-message {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: #fff0f0;
+  color: #d32f2f;
+  border-left: 4px solid #d32f2f;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  animation: fadeIn 0.3s ease;
+}
+
+/* Keyframes */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Custom Scrollbar for the textarea */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg); 
+  border-radius: 4px;
+}
+ 
+::-webkit-scrollbar-thumb {
+  background: var(--color-border); 
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #c1c9d6; 
+}
+
+
+/* Extra Settings Modal Styles */
+.settings-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-primary);
+  opacity: 0.7;
+  transition: opacity 0.3s;
+}
+.settings-btn:hover {
+  opacity: 1;
+}
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.active {
+  display: flex;
+}
+.modal-content {
+  background: white;
+  padding: 2.5rem;
+  border-radius: var(--radius-lg);
+  width: 90%;
+  max-width: 400px;
+  box-shadow: var(--shadow-lg);
+}
+.modal-content h2 {
+  margin-bottom: 1.5rem;
+  color: var(--color-primary);
+  font-family: 'Playfair Display', serif;
+}
+.modal-content .input-group {
+  margin-bottom: 1.5rem;
+}
+.modal-content input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+.modal-actions button {
+  padding: 0.5rem 1.5rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: 600;
+  border: none;
+}
+.btn-cancel {
+  background: transparent;
+  color: #666;
+}
+.btn-save {
+  background: var(--color-primary);
+  color: white;
+}
+  </style>
+</head>
+<body>
+
+  <!-- Settings Button -->
+  <button id="open-settings" class="settings-btn" title="Settings">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"></circle>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+    </svg>
+  </button>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal" class="modal-overlay">
+    <div class="modal-content">
+      <h2>API Settings</h2>
+      <div class="input-group">
+        <label for="gemini-key">Gemini API Key</label>
+        <input type="password" id="gemini-key" placeholder="Enter Gemini API Key...">
+      </div>
+      <div class="input-group">
+        <label for="pexels-key">Pexels API Key</label>
+        <input type="password" id="pexels-key" placeholder="Enter Pexels API Key...">
+      </div>
+      <div class="modal-actions">
+        <button id="close-settings" class="btn-cancel">Cancel</button>
+        <button id="save-settings" class="btn-save">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <header class="header">
+      <p>Ceylon Signature Travel</p>
+      <h1>Itinerary Studio</h1>
+    </header>
+
+    <main class="studio-card">
+      <div class="input-group">
+        <label for="itinerary-text">Raw Itinerary Content</label>
+        <textarea 
+          id="itinerary-text"
+          class="itinerary-input"
+          placeholder="Paste the raw text itinerary here... (Includes guest name, dates, day-by-day breakdown, and hotel details)"
+        ></textarea>
+      </div>
+
+      <div class="controls">
+        <button id="generate-btn" class="btn btn-primary">
+          <span id="btn-text">Generate Itinerary</span>
+          <div id="spinner" class="spinner" style="display: none;"></div>
+        </button>
+
+        <a id="download-btn" class="btn btn-secondary" style="display: none;">
+          Download PDF
+        </a>
+      </div>
+
+      <div id="error-message" class="error-message" style="display: none;"></div>
+    </main>
+  </div>
+
+  <script>
+    // Elements
+    const rawTextInput = document.getElementById('itinerary-text');
+    const generateBtn = document.getElementById('generate-btn');
+    const btnText = document.getElementById('btn-text');
+    const spinner = document.getElementById('spinner');
+    const downloadBtn = document.getElementById('download-btn');
+    const errorMsg = document.getElementById('error-message');
+    
+    const settingsModal = document.getElementById('settings-modal');
+    const openSettingsBtn = document.getElementById('open-settings');
+    const closeSettingsBtn = document.getElementById('close-settings');
+    const saveSettingsBtn = document.getElementById('save-settings');
+    
+    const geminiInput = document.getElementById('gemini-key');
+    const pexelsInput = document.getElementById('pexels-key');
+
+    // Load keys from LocalStorage
+    geminiInput.value = localStorage.getItem('gemini_key') || '';
+    pexelsInput.value = localStorage.getItem('pexels_key') || '';
+
+    // Modal Logic
+    openSettingsBtn.addEventListener('click', () => {
+      settingsModal.classList.add('active');
+    });
+
+    closeSettingsBtn.addEventListener('click', () => {
+      settingsModal.classList.remove('active');
+      geminiInput.value = localStorage.getItem('gemini_key') || '';
+      pexelsInput.value = localStorage.getItem('pexels_key') || '';
+    });
+
+    saveSettingsBtn.addEventListener('click', () => {
+      localStorage.setItem('gemini_key', geminiInput.value.trim());
+      localStorage.setItem('pexels_key', pexelsInput.value.trim());
+      settingsModal.classList.remove('active');
+    });
+
+    // Generate Logic
+    generateBtn.addEventListener('click', async () => {
+      const rawText = rawTextInput.value.trim();
+      if (!rawText) {
+        showError("Please enter the raw itinerary text first.");
+        return;
+      }
+
+      // Reset state
+      errorMsg.style.display = 'none';
+      downloadBtn.style.display = 'none';
+      downloadBtn.href = '#';
+      
+      // UI Loading state
+      rawTextInput.disabled = true;
+      generateBtn.disabled = true;
+      btnText.innerText = "Generating...";
+      spinner.style.display = 'block';
+
+      try {
+        const response = await fetch('http://127.0.0.1:8000/generate-from-raw', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Gemini-Key': localStorage.getItem('gemini_key') || '',
+            'X-Pexels-Key': localStorage.getItem('pexels_key') || ''
+          },
+          body: JSON.stringify({ raw_text: rawText })
+        });
+
+        if (!response.ok) {
+          let errMsg = `Server error: ${response.status}`;
+          try {
+            const errData = await response.json();
+            errMsg = errData.detail || errMsg;
+          } catch (e) {}
+          throw new Error(errMsg);
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        
+        // Setup download button
+        downloadBtn.href = url;
+        downloadBtn.download = "Ceylon_Signature_Itinerary.pdf";
+        downloadBtn.style.display = 'inline-flex';
+        
+      } catch (err) {
+        console.error(err);
+        showError(err.message || "Failed to generate itinerary. Please try again.");
+      } finally {
+        rawTextInput.disabled = false;
+        generateBtn.disabled = false;
+        btnText.innerText = "Generate Itinerary";
+        spinner.style.display = 'none';
+      }
+    });
+
+    function showError(msg) {
+      errorMsg.innerHTML = `<strong>Error:</strong> ${msg}`;
+      errorMsg.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

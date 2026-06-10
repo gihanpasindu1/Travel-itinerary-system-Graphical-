@@ -1,0 +1,31 @@
+# Environments
+.env
+.venv/
+venv/
+ENV/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Executables and large binaries
+ngrok.exe
+ngrok
+
+# Generated outputs
+*_Itinerary.pdf
+extracted_coords.json
+
+# Ignore generated itineraries in templates but keep the empty template
+templates/*Itinerary.pdf
+templates/*.pdf
+!templates/empty  template.pdf
+
+# OS/IDE metadata
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
