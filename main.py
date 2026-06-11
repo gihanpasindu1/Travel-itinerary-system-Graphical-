@@ -110,7 +110,7 @@ async def generate_pdf_from_raw(payload: RawItineraryRequest, request: Request):
         pexels_key = request.headers.get("x-pexels-key")
 
         # 1. Parse raw text into structured format using Gemini
-        parsed_data = parse_raw_itinerary(payload.raw_text, gemini_key=gemini_key)
+        parsed_data = parse_raw_itinerary(payload.raw_text, api_key=gemini_key)
         
         # 2. Resolve image search keywords in parallel for massive speedup
         async def resolve_day_images(day):
