@@ -315,7 +315,7 @@ body {
       <h2>API Settings</h2>
       <div class="input-group">
         <label for="backend-url">Backend API URL</label>
-        <input type="text" id="backend-url" placeholder="http://127.0.0.1:8000">
+        <input type="text" id="backend-url" placeholder="https://travel-itinerary-system-graphical.onrender.com">
       </div>
       <div class="input-group">
         <label for="gemini-key">Gemini API Key</label>
@@ -382,7 +382,7 @@ body {
     const pexelsInput = document.getElementById('pexels-key');
 
     // Load keys from LocalStorage
-    backendUrlInput.value = localStorage.getItem('backend_url') || 'http://127.0.0.1:8000';
+    backendUrlInput.value = localStorage.getItem('backend_url') || 'https://travel-itinerary-system-graphical.onrender.com';
     geminiInput.value = localStorage.getItem('gemini_key') || '';
     pexelsInput.value = localStorage.getItem('pexels_key') || '';
 
@@ -393,7 +393,7 @@ body {
 
     closeSettingsBtn.addEventListener('click', () => {
       settingsModal.classList.remove('active');
-      backendUrlInput.value = localStorage.getItem('backend_url') || 'http://127.0.0.1:8000';
+      backendUrlInput.value = localStorage.getItem('backend_url') || 'https://travel-itinerary-system-graphical.onrender.com';
       geminiInput.value = localStorage.getItem('gemini_key') || '';
       pexelsInput.value = localStorage.getItem('pexels_key') || '';
     });
@@ -404,7 +404,7 @@ body {
       if (url.endsWith('/')) {
         url = url.slice(0, -1);
       }
-      localStorage.setItem('backend_url', url || 'http://127.0.0.1:8000');
+      localStorage.setItem('backend_url', url || 'https://travel-itinerary-system-graphical.onrender.com');
       localStorage.setItem('gemini_key', geminiInput.value.trim());
       localStorage.setItem('pexels_key', pexelsInput.value.trim());
       settingsModal.classList.remove('active');
@@ -430,7 +430,7 @@ body {
       spinner.style.display = 'block';
 
       try {
-        const baseUrl = localStorage.getItem('backend_url') || 'http://127.0.0.1:8000';
+        const baseUrl = localStorage.getItem('backend_url') || 'https://travel-itinerary-system-graphical.onrender.com';
         const response = await fetch(`${baseUrl}/generate-from-raw`, {
           method: 'POST',
           headers: {
