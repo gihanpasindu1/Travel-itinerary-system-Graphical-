@@ -288,34 +288,8 @@ async def generate_itinerary(payload: dict) -> str:
                 fontsize=11, fontname="helv", color=(0, 0, 0), align=fitz.TEXT_ALIGN_CENTER
             )
             
-        # 2. Draw the 3 bottom images
-        # Collect all successful image bytes from previous days
-        all_trip_images = []
-        for day in days:
-            if "image_urls" in day:
-                all_trip_images.extend(day["image_urls"])
-        
-        if all_trip_images:
-            # Grab up to 3 images for the collage
-            selected_urls = all_trip_images[:3]
-            
-            # Download them
-            download_tasks = [fetch_image(url) for url in selected_urls]
-            img_bytes_list = await asyncio.gather(*download_tasks)
-            valid_imgs = [b for b in img_bytes_list if b]
-            
-            page10_image_boxes = [
-                fitz.Rect(228.2, 598.0, 359.5, 752.6),
-                fitz.Rect(32.2, 581.0, 165.1, 717.6),
-                fitz.Rect(370.1, 498.3, 595.5, 649.1)
-            ]
-            
-            for i, img_data in enumerate(valid_imgs):
-                if i < len(page10_image_boxes):
-                    try:
-                        page10.insert_image(page10_image_boxes[i], stream=img_data, keep_proportion=False)
-                    except Exception as e:
-                        print(f"Error rendering page 10 image {i}: {e}")
+        # The 3 bottom images are already baked into the Canva template background.
+        # No need to dynamically fetch and draw them.
 
     # Save output
     guest_name = payload.get("guest_name", "Client").replace(" ", "_")
