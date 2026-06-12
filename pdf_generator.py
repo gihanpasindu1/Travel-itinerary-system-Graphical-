@@ -262,27 +262,13 @@ async def generate_itinerary(payload: dict) -> str:
         
         # Table configuration
         x0, x1, x2, x3 = 20, 195, 380, 580
-        header_y = 65.0
         start_y = 88.0
         row_height = 22.5
         
         # Limit rows to 9 to prevent overflow
         display_hotels = hotels[:9]
-        total_table_height = start_y + (len(display_hotels) * row_height)
         
-        # 1. Draw Headers
-        headers = [
-            ("Destination", fitz.Rect(x0, header_y, x1, start_y)),
-            ("Hotel/Resort stay", fitz.Rect(x1, header_y, x2, start_y)),
-            ("Room type, Meal basis & no of nights", fitz.Rect(x2, header_y, x3, start_y))
-        ]
-        
-        for text, rect in headers:
-            page10.insert_textbox(
-                rect, text, fontsize=11, fontname="hebo", color=(0, 0, 0), align=fitz.TEXT_ALIGN_CENTER
-            )
-            
-        # 2. Draw Data Rows
+        # Draw Data Rows (Text only, grid is in template)
         for idx, hotel in enumerate(display_hotels):
             y = start_y + (idx * row_height)
             
@@ -301,18 +287,6 @@ async def generate_itinerary(payload: dict) -> str:
                 hotel.get("details", ""),
                 fontsize=11, fontname="helv", color=(0, 0, 0), align=fitz.TEXT_ALIGN_CENTER
             )
-            
-            # Draw row bottom border
-            page10.draw_line(fitz.Point(x0, y + row_height), fitz.Point(x3, y + row_height), color=(0, 0, 0), width=1)
-
-        # 3. Draw Table Grid Boundaries
-        # Outer Border
-        page10.draw_rect(fitz.Rect(x0, header_y, x3, total_table_height), color=(0, 0, 0), width=1.5)
-        # Header bottom line
-        page10.draw_line(fitz.Point(x0, start_y), fitz.Point(x3, start_y), color=(0, 0, 0), width=1.5)
-        # Vertical column lines
-        page10.draw_line(fitz.Point(x1, header_y), fitz.Point(x1, total_table_height), color=(0, 0, 0), width=1)
-        page10.draw_line(fitz.Point(x2, header_y), fitz.Point(x2, total_table_height), color=(0, 0, 0), width=1)
 
     # Save output
     guest_name = payload.get("guest_name", "Client").replace(" ", "_")
