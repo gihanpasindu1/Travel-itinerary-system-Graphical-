@@ -259,44 +259,60 @@ async def generate_itinerary(payload: dict) -> str:
     hotels = payload.get("hotels", [])
     if hotels and len(doc) >= 10:
         page10 = doc[9] # Page 10 (0-indexed)
+        
+        # Table configuration
+        x0, x1, x2, x3 = 20, 195, 380, 580
+        header_y = 65.0
         start_y = 88.0
         row_height = 22.5
         
-        for idx, hotel in enumerate(hotels[:9]): # Cap at 9 rows to avoid overflow
+        # Limit rows to 9 to prevent overflow
+        display_hotels = hotels[:9]
+        total_table_height = start_y + (len(display_hotels) * row_height)
+        
+        # 1. Draw Headers
+        headers = [
+            ("Destination", fitz.Rect(x0, header_y, x1, start_y)),
+            ("Hotel/Resort stay", fitz.Rect(x1, header_y, x2, start_y)),
+            ("Room type, Meal basis & no of nights", fitz.Rect(x2, header_y, x3, start_y))
+        ]
+        
+        for text, rect in headers:
+            page10.insert_textbox(
+                rect, text, fontsize=11, fontname="hebo", color=(0, 0, 0), align=fitz.TEXT_ALIGN_CENTER
+            )
+            
+        # 2. Draw Data Rows
+        for idx, hotel in enumerate(display_hotels):
             y = start_y + (idx * row_height)
             
-            # Column 1: Destination
-            dest_rect = fitz.Rect(20, y, 195, y + row_height)
             page10.insert_textbox(
-                dest_rect,
+                fitz.Rect(x0, y, x1, y + row_height),
                 hotel.get("destination", ""),
-                fontsize=11,
-                fontname="helv",
-                color=(0, 0, 0),
-                align=fitz.TEXT_ALIGN_CENTER
+                fontsize=11, fontname="helv", color=(0, 0, 0), align=fitz.TEXT_ALIGN_CENTER
             )
-            
-            # Column 2: Hotel Name
-            hotel_rect = fitz.Rect(195, y, 380, y + row_height)
             page10.insert_textbox(
-                hotel_rect,
+                fitz.Rect(x1, y, x2, y + row_height),
                 hotel.get("hotel_name", ""),
-                fontsize=11,
-                fontname="helv",
-                color=(0, 0, 0),
-                align=fitz.TEXT_ALIGN_CENTER
+                fontsize=11, fontname="helv", color=(0, 0, 0), align=fitz.TEXT_ALIGN_CENTER
+            )
+            page10.insert_textbox(
+                fitz.Rect(x2, y, x3, y + row_height),
+                hotel.get("details", ""),
+                fontsize=11, fontname="helv", color=(0, 0, 0), align=fitz.TEXT_ALIGN_CENTER
             )
             
-            # Column 3: Details (Room/Meal/Nights)
-            details_rect = fitz.Rect(380, y, 580, y + row_height)
-            page10.insert_textbox(
-                details_rect,
-                hotel.get("details", ""),
-                fontsize=11,
-                fontname="helv",
-                color=(0, 0, 0),
-                align=fitz.TEXT_ALIGN_CENTER
-            )
+            # Draw row bottom border
+            page10.draw_line(fitz.Point(x0, y + row_height), fitz.Point(x3, y + row_height), color=(0, 0, 0), width=1)
+
+        # 3. Draw Table Grid Boundaries
+        # Outer Border
+        page10.draw_rect(fitz.Rect(x0, header_y, x3, total_table_height), color=(0, 0, 0), width=1.5)
+        # Header bottom line
+        page10.draw_line(fitz.Point(x0, start_y), fitz.Point(x3, start_y), color=(0, 0, 0), width=1.5)
+        # Vertical column lines
+        page10.draw_line(fitz.Point(x1, header_y), fitz.Point(x1, total_table_height), color=(0, 0, 0), width=1)
+        page10.draw_line(fitz.Point(x2, header_y), fitz.Point(x2, total_table_height), color=(0, 0, 0), width=1)
 
     # Save output
     guest_name = payload.get("guest_name", "Client").replace(" ", "_")
