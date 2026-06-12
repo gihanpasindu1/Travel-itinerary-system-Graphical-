@@ -255,6 +255,48 @@ async def generate_itinerary(payload: dict) -> str:
                         color=(0, 0, 0)
                     )
 
+    # --- FILL PAGE 10 (HOTEL SUMMARY TABLE) ---
+    hotels = payload.get("hotels", [])
+    if hotels and len(doc) >= 10:
+        page10 = doc[9] # Page 10 (0-indexed)
+        start_y = 88.0
+        row_height = 22.5
+        
+        for idx, hotel in enumerate(hotels[:9]): # Cap at 9 rows to avoid overflow
+            y = start_y + (idx * row_height)
+            
+            # Column 1: Destination
+            dest_rect = fitz.Rect(20, y, 195, y + row_height)
+            page10.insert_textbox(
+                dest_rect,
+                hotel.get("destination", ""),
+                fontsize=11,
+                fontname="helv",
+                color=(0, 0, 0),
+                align=fitz.TEXT_ALIGN_CENTER
+            )
+            
+            # Column 2: Hotel Name
+            hotel_rect = fitz.Rect(195, y, 380, y + row_height)
+            page10.insert_textbox(
+                hotel_rect,
+                hotel.get("hotel_name", ""),
+                fontsize=11,
+                fontname="helv",
+                color=(0, 0, 0),
+                align=fitz.TEXT_ALIGN_CENTER
+            )
+            
+            # Column 3: Details (Room/Meal/Nights)
+            details_rect = fitz.Rect(380, y, 580, y + row_height)
+            page10.insert_textbox(
+                details_rect,
+                hotel.get("details", ""),
+                fontsize=11,
+                fontname="helv",
+                color=(0, 0, 0),
+                align=fitz.TEXT_ALIGN_CENTER
+            )
 
     # Save output
     guest_name = payload.get("guest_name", "Client").replace(" ", "_")
