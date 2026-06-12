@@ -255,34 +255,20 @@ async def generate_itinerary(payload: dict) -> str:
                         color=(0, 0, 0)
                     )
 
-    # --- FILL PAGE 10 (HOTEL SUMMARY TABLE) ---
+    # --- FILL PAGE 10 (HOTEL SUMMARY TABLE & IMAGES) ---
     hotels = payload.get("hotels", [])
     if hotels and len(doc) >= 10:
         page10 = doc[9] # Page 10 (0-indexed)
         
-        # Table configuration
+        # Table configuration (aligns with the new template)
         x0, x1, x2, x3 = 20, 195, 380, 580
-        header_y = 200.0  # Adjusting down to start after the top banner based on screenshot
-        start_y = 225.0
+        start_y = 88.0
         row_height = 22.5
         
         # Limit rows to 9 to prevent overflow
         display_hotels = hotels[:9]
-        total_table_height = start_y + (len(display_hotels) * row_height)
         
-        # 1. Draw Headers
-        headers = [
-            ("Destination", fitz.Rect(x0, header_y, x1, start_y)),
-            ("Hotel/Resort stay", fitz.Rect(x1, header_y, x2, start_y)),
-            ("Room type, Meal basis & no of nights", fitz.Rect(x2, header_y, x3, start_y))
-        ]
-        
-        for text, rect in headers:
-            page10.insert_textbox(
-                rect, text, fontsize=11, fontname="hebo", color=(0, 0, 0), align=fitz.TEXT_ALIGN_CENTER
-            )
-            
-        # 2. Draw Data Rows
+        # 1. Draw Data Rows (Text only, grid and headers are in the template)
         for idx, hotel in enumerate(display_hotels):
             y = start_y + (idx * row_height)
             
@@ -302,17 +288,34 @@ async def generate_itinerary(payload: dict) -> str:
                 fontsize=11, fontname="helv", color=(0, 0, 0), align=fitz.TEXT_ALIGN_CENTER
             )
             
-            # Draw row bottom border
-            page10.draw_line(fitz.Point(x0, y + row_height), fitz.Point(x3, y + row_height), color=(0, 0, 0), width=1)
-
-        # 3. Draw Table Grid Boundaries
-        # Outer Border
-        page10.draw_rect(fitz.Rect(x0, header_y, x3, total_table_height), color=(0, 0, 0), width=1.5)
-        # Header bottom line
-        page10.draw_line(fitz.Point(x0, start_y), fitz.Point(x3, start_y), color=(0, 0, 0), width=1.5)
-        # Vertical column lines
-        page10.draw_line(fitz.Point(x1, header_y), fitz.Point(x1, total_table_height), color=(0, 0, 0), width=1)
-        page10.draw_line(fitz.Point(x2, header_y), fitz.Point(x2, total_table_height), color=(0, 0, 0), width=1)
+        # 2. Draw the 3 bottom images
+        # Collect all successful image bytes from previous days
+        all_trip_images = []
+        for day in days:
+            if "image_urls" in day:
+                all_trip_images.extend(day["image_urls"])
+        
+        if all_trip_images:
+            # Grab up to 3 images for the collage
+            selected_urls = all_trip_images[:3]
+            
+            # Download them
+            download_tasks = [fetch_image(url) for url in selected_urls]
+            img_bytes_list = await asyncio.gather(*download_tasks)
+            valid_imgs = [b for b in img_bytes_list if b]
+            
+            page10_image_boxes = [
+                fitz.Rect(228.2, 598.0, 359.5, 752.6),
+                fitz.Rect(32.2, 581.0, 165.1, 717.6),
+                fitz.Rect(370.1, 498.3, 595.5, 649.1)
+            ]
+            
+            for i, img_data in enumerate(valid_imgs):
+                if i < len(page10_image_boxes):
+                    try:
+                        page10.insert_image(page10_image_boxes[i], stream=img_data, keep_proportion=False)
+                    except Exception as e:
+                        print(f"Error rendering page 10 image {i}: {e}")
 
     # Save output
     guest_name = payload.get("guest_name", "Client").replace(" ", "_")
